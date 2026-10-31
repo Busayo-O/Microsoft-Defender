@@ -41,33 +41,64 @@ STEP 1----Onboarding of the VM to MDE(Microsoft Defender for Endpoint) <br/>
 <br /> (v) Release of the device from Isolation
 <img src="https://i.imgur.com/VxIogeF.png" height="80%"/>
 
-<br />STEP 3--- Create an Investigation Package
+<br />STEP 3--- Log Investigation
 
-<b> (i) Creation of folder on the VMs desktop with files in it and installation of a browser(Tor Brower)-This enables device network connection table to get logsn device file events table to creating logs(because of the creation of files on the desktop),the process events table is getting logs because edge was opened and installation of the Tor browser- all these are creating logs in defender
-<b> (ii) Collection of investigation package for the device- This is done by logging in to the MDE
+<b> (i)Create an Investigation Package
+<b> (a) Creation of folder on the VMs desktop with files in it and installation of a browser(Tor Brower)-This enables device network connection table to get logsn device file events table to creating logs(because of the creation of files on the desktop),the process events table is getting logs because edge was opened and installation of the Tor browser- all these are creating logs in defender
 <img src="https://i.imgur.com/GNX0am7.png" height="80%" width="80%"/>
-<br />
-<br />
-Sanitization complete:  <br/>
-<img src="https://i.imgur.com/K71yaM2.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-<br />
-<br />
-Observe the wiped disk:  <br/>
-<img src="https://i.imgur.com/AeZkvFQ.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
-Wait for process to complete (may take some time):  <br/>
-<img src="https://i.imgur.com/JL945Ga.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-<br />
-<br />
-Sanitization complete:  <br/>
-<img src="https://i.imgur.com/K71yaM2.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-<br />
-<br />
-Observe the wiped disk:  <br/>
-<img src="https://i.imgur.com/AeZkvFQ.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
 
+<br> (ii) Collection of investigation package for the device- This is done by logging in to the MDE
+<img src="https://i.imgur.com/gnqi08T.png" height="80%" width="80%"/>
+<img src="https://i.imgur.com/B3U8aK2.png" height="80%" width="80%"/>
 
+<br />STEP 4---Log Generation
+
+<b> (i) DeviceLogEvent
+
+Goal: Generated an authentication event to be able to see the records
+
+Task :Connected to the Virtual Machine via RDP (Remote Desktop Protocol, or Azure Bastion, )
+<img src="https://i.imgur.com/hMHBAHS.png" height="80%" width="80%"/>      
+
+<b> (ii) DeviceProcessEvents
+
+Goal: Started a process and captured its command line and parent.
+
+Task : Opened cmd and run a harmless command that creates a clear parent-child chain
+<img src="https://i.imgur.com/3FHayNV.png" height="80%" width="80%"/>   
+
+<b> (iii) DeviceNetworkEvents
+
+Goal: Made an outbound connection and see the destination logged.
+
+Task : From PowerShell, a plain HTTPS request was sent to a benign, easily recognisable destination so it stands out in the results:
+<img src="https://i.imgur.com/f1A95f1.png" height="80%" width="80%"/>
+
+<b> (iv) DeviceFileEvents
+
+Goal: Create a file in a staging-style location and capture the write.
+
+Task : Write a harmless file into the Temp directory (the same folder the implant used in Module 1):
+echo benign-lab-test > C:\Windows\Temp\labtest.txt
+
+To also get a hash recorded, drop a copy of an existing executable instead:
+copy C:\Windows\System32\notepad.exe C:\Windows\Temp\labtest.exe
+<img src="https://i.imgur.com/OCyr7fq.png" height="80%" width="80%"/>  
+
+<b> (v) DeviceRegistryEvents
+
+Goal: Write an autostart (Run key) value and observe the registry change.
+
+Task : Add a Run key value pointing at a benign program, mirroring the persistence stage without any malware. Then remove it:
+<img src="https://i.imgur.com/EcfvlRH.png" height="80%" width="80%"/> 
+
+<b> (vi) DeviceEvents
+
+Goal: Trigger a structured sensor event — a scheduled task creation.
+DeviceEvents is the catch-all for typed sensor events that don’t have a dedicated table. Creating a scheduled task raises a clean ScheduledTaskCreated action here (a service install would raise ServiceInstalled the same way).
+
+Task : Create a harmless daily task
+<img src="https://i.imgur.com/OksSJmt.png" height="80%" width="80%"/> 
 
 
 <!--
